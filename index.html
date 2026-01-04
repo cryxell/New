@@ -9,41 +9,45 @@
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
-            overflow: hidden; background-color: #000;
+            overflow: hidden; background-color: #00020a;
             font-family: 'Inter', sans-serif; color: white;
         }
 
-        /* 1. Arka Plan: Yıldızlar ve Uzay Derinliği */
         .cosmos-bg {
-            position: fixed; top: -10%; left: -10%; width: 120%; height: 120%;
+            position: fixed; top: -5%; left: -5%; width: 110%; height: 110%;
             background-image: url('https://images.unsplash.com/photo-1464802686167-b939a67e06a1?q=80&w=2000&auto=format&fit=crop');
             background-size: cover; background-position: center;
-            filter: brightness(0.6); z-index: 1;
+            filter: brightness(0.7); z-index: 1;
             transition: transform 0.2s ease-out;
+            will-change: transform;
+        }
+
+        .stars-fallback {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('https://www.transparenttextures.com/patterns/stardust.png'), 
+                              linear-gradient(to bottom, #000428, #000000);
+            z-index: 1; opacity: 0.5;
         }
 
         .overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, rgba(0,0,0,0) 0%, rgba(0,0,0,0.8) 100%);
+            background: radial-gradient(circle, transparent 20%, rgba(0,0,0,0.85) 100%);
             z-index: 2;
         }
 
-        /* 2. Müzik Butonu (Sağ Üst) */
         .audio-control {
             position: fixed; top: 20px; right: 20px; z-index: 100;
             background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
             color: white; padding: 12px 20px; border-radius: 50px;
             cursor: pointer; backdrop-filter: blur(10px); font-size: 14px;
-            font-weight: bold; transition: 0.3s;
+            font-weight: bold;
         }
-        .audio-control:hover { background: rgba(255,255,255,0.25); }
 
         canvas#fireworks {
             position: fixed; top: 0; left: 0; width: 100%; height: 60%;
             z-index: 3; pointer-events: none;
         }
 
-        /* 3. Metin ve Mesaj Kutusu */
         .center-wrapper {
             position: relative; z-index: 4; height: 100vh;
             display: flex; flex-direction: column;
@@ -54,7 +58,7 @@
         h1 {
             font-size: clamp(2rem, 8vw, 4.5rem); margin: 0 0 20px 0;
             font-weight: 900; text-align: center; text-transform: uppercase;
-            background: linear-gradient(to right, #ff7eb3, #7afcff, #feffb7, #ff7eb3);
+            background: linear-gradient(to right, #ff3d3d, #ffd700, #3d85ff, #ff3d3d);
             background-size: 200% auto; -webkit-background-clip: text;
             -webkit-text-fill-color: transparent; animation: shine 5s linear infinite;
             line-height: 1.1;
@@ -62,11 +66,11 @@
 
         .message-box {
             max-width: 650px; width: 95%;
-            background: rgba(0, 0, 0, 0.55); backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
             padding: clamp(20px, 5vw, 35px); border-radius: 30px;
             border: 1px solid rgba(255, 255, 255, 0.15);
-            text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.7);
+            text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.6);
         }
 
         .message-box p {
@@ -74,18 +78,17 @@
             margin: 0; color: #fff; font-weight: 400;
         }
 
-        /* 4. Etkileşim: Dilek Butonu ve İmza */
         .dilek-btn {
-            margin: 25px 0; background: linear-gradient(45deg, #ff7eb3, #ff758c);
+            margin: 25px 0; background: linear-gradient(45deg, #ff3d3d, #ffd700);
             border: none; color: white; padding: 15px 35px;
             border-radius: 50px; font-weight: bold; cursor: pointer;
-            transition: 0.3s; font-size: 1rem; box-shadow: 0 10px 20px rgba(255, 117, 140, 0.3);
+            transition: 0.3s; font-size: 1rem; box-shadow: 0 10px 20px rgba(255, 61, 61, 0.3);
         }
-        .dilek-btn:hover { transform: scale(1.05); box-shadow: 0 15px 30px rgba(255, 117, 140, 0.5); }
+        .dilek-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(255, 215, 0, 0.5); }
 
         .signature {
             font-family: 'Dancing Script', cursive; font-size: 2.2rem;
-            color: #ff7eb3; margin-top: 15px;
+            color: #ffd700; margin-top: 15px;
         }
 
         @keyframes shine { to { background-position: 200% center; } }
@@ -93,6 +96,7 @@
 </head>
 <body>
 
+    <div class="stars-fallback"></div>
     <div class="cosmos-bg" id="bg"></div>
     <div class="overlay"></div>
     <canvas id="fireworks"></canvas>
@@ -119,38 +123,29 @@
     </div>
 
     <script>
-        // Paralaks: Fare/Ekran hareketiyle arka planın oynaması
         const bg = document.getElementById('bg');
         window.addEventListener('mousemove', (e) => {
-            const x = (window.innerWidth / 2 - e.pageX) / 45;
-            const y = (window.innerHeight / 2 - e.pageY) / 45;
+            const x = (window.innerWidth / 2 - e.pageX) / 40;
+            const y = (window.innerHeight / 2 - e.pageY) / 40;
             bg.style.transform = `scale(1.1) translate(${x}px, ${y}px)`;
         });
 
-        // Müzik: music.mp3 dosyasını çal/durdur
         const music = document.getElementById('bgMusic');
         const audioBtn = document.getElementById('audioBtn');
         function toggleAudio() {
-            if (music.paused) { 
-                music.play(); 
-                audioBtn.innerHTML = "⏸ Durdur"; 
-            } else { 
-                music.pause(); 
-                audioBtn.innerHTML = "🎵 Müziği Aç"; 
-            }
+            if (music.paused) { music.play().catch(e => console.log("Hata:", e)); audioBtn.innerHTML = "⏸ Durdur"; }
+            else { music.pause(); audioBtn.innerHTML = "🎵 Müziği Aç"; }
         }
 
-        // Kutlama: Konfeti yağmuru
         function celebrate() {
             confetti({ 
                 particleCount: 200, 
                 spread: 80, 
                 origin: { y: 0.6 }, 
-                colors: ['#ffd700', '#ff7eb3', '#ffffff', '#7afcff'] 
+                colors: ['#ff3d3d', '#ffd700', '#3d85ff', '#ffffff'] 
             });
         }
 
-        // Havai Fişek Animasyonu
         const canvas = document.getElementById('fireworks');
         const ctx = canvas.getContext('2d');
         let particles = [];
@@ -162,187 +157,46 @@
                 this.x=x; this.y=y; this.c=c;
                 this.v={x:(Math.random()-0.5)*5, y:(Math.random()-0.5)*5};
                 this.a=1;
+                this.friction = 0.97;
             }
             draw() {
-                ctx.globalAlpha=this.a; ctx.beginPath();
-                ctx.arc(this.x,this.y,1.5,0,Math.PI*2);
-                ctx.fillStyle=this.c; ctx.fill();
+                ctx.globalAlpha = this.a;
+                // Işıma/Parlama efekti ekleme
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = this.c;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 1.8, 0, Math.PI * 2);
+                ctx.fillStyle = this.c;
+                ctx.fill();
+                ctx.shadowBlur = 0; // Diğer çizimler için sıfırlama
             }
-            update() { this.x+=this.v.x; this.y+=this.v.y+0.2; this.a-=0.01; }
+            update() { 
+                this.v.x *= this.friction;
+                this.v.y *= this.friction;
+                this.x += this.v.x; 
+                this.y += this.v.y + 0.15; // Hafif yerçekimi
+                this.a -= 0.008; 
+            }
         }
 
         function animate() {
             ctx.clearRect(0,0,canvas.width,canvas.height);
-            if(Math.random()<0.045) {
-                const x=Math.random()*canvas.width, y=Math.random()*canvas.height, color=`hsl(${Math.random()*360}, 100%, 80%)`;
-                for(let i=0; i<30; i++) particles.push(new Particle(x,y,color));
+            if(Math.random() < 0.05) {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * (canvas.height * 0.8);
+                // İstediğin kor renkleri: Kırmızı, Sarı, Mavi ve Beyaz karışımı
+                const korRenkleri = ['#ff3d3d', '#ff9100', '#ffd700', '#3d85ff', '#ffffff'];
+                const secilenRenk = korRenkleri[Math.floor(Math.random() * korRenkleri.length)];
+                
+                for(let i=0; i < 35; i++) particles.push(new Particle(x, y, secilenRenk));
             }
-            particles.forEach((p,i) => { if(p.a<=0) particles.splice(i,1); else {p.update(); p.draw();} });
-            requestAnimationFrame(animate);
-        }
-        animate();
-    </script>
-</body>
-</html>            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.4);
-            z-index: 2;
-        }
-
-        canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 50%; /* Havai fişekler sadece üst yarıda */
-            z-index: 3;
-            pointer-events: none;
-        }
-
-        /* Merkeze Hizalama Konteynırı */
-        .center-wrapper {
-            position: relative;
-            z-index: 4;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center; /* Dikeyde tam orta */
-            align-items: center;     /* Yatayda tam orta */
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
-        h1 {
-            font-size: clamp(2rem, 8vw, 4.5rem);
-            margin: 0 0 15px 0;
-            font-weight: 900;
-            text-align: center;
-            text-transform: uppercase;
-            line-height: 1.1;
-            background: linear-gradient(to right, #ff7eb3, #7afcff, #feffb7, #ff7eb3);
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: shine 5s linear infinite;
-            transition: transform 0.3s ease;
-        }
-
-        .message-box {
-            max-width: 650px;
-            width: 90%;
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            padding: clamp(15px, 4vw, 30px);
-            border-radius: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
-            text-align: center;
-        }
-
-        .message-box p {
-            font-size: clamp(0.85rem, 2.2vw, 1.1rem);
-            line-height: 1.6;
-            margin: 0;
-            font-weight: 300;
-            color: rgba(255, 255, 255, 0.9);
-        }
-
-        strong {
-            color: #fff;
-            font-weight: 700;
-            text-shadow: 0 0 10px rgba(255,255,255,0.2);
-        }
-
-        @keyframes shine {
-            to { background-position: 200% center; }
-        }
-
-        @media (max-height: 700px) {
-            .message-box { padding: 15px; }
-            h1 { margin-bottom: 10px; }
-        }
-    </style>
-</head>
-<body>
-
-    <div class="city-bg"></div>
-    <div class="overlay"></div>
-    <canvas id="fireworksCanvas"></canvas>
-
-    <div class="center-wrapper">
-        <h1>DOĞUM GÜNÜN<br>KUTLU OLSUN</h1>
-        
-        <div class="message-box">
-            <p>
-                Her şeyden önce şunu bil: bu hayatta gerçekten başardığın, tutunduğun, “iyi ki” dediğin şeyler var ve sen onların en önemlisisin. <br><br>
-                Herkes bir şey olmaya çalışıyor ama asıl mesele <strong>kendin olarak ayakta kalabilmek.</strong> Onu yapabilen çok az insan var, sen onlardansın.<br><br>
-                Şimdi gözlerini kapat ve içinden bir dilek tut. <br>
-                Başkasının hayatı, başkasının yolu değil; <strong>senin yolun.</strong> <br><br>
-                Hatalarınla, eksiklerinle, inatçılığınla ama hâlâ dimdik duran hâlinle… <br>
-                <strong>Kendinle gurur duymayı öğren.</strong> Çünkü buna hakkın var. <br><br>
-                Sağlık olsun, kafan biraz daha rahat olsun, kalbin daha az yorulsun. <br>
-                Dileğini tuttun mu? Tut. <br>
-                <strong>Çünkü bu yaşta en büyük başarı sen olacaksın. 🎉</strong>
-            </p>
-        </div>
-    </div>
-
-    <script>
-        const canvas = document.getElementById('fireworksCanvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight * 0.5;
-        }
-        window.addEventListener('resize', resize);
-        resize();
-
-        class Particle {
-            constructor(x, y, color) {
-                this.x = x; this.y = y; this.color = color;
-                this.velocity = { x: (Math.random() - 0.5) * 5, y: (Math.random() - 0.5) * 5 };
-                this.alpha = 1; this.friction = 0.97;
-            }
-            draw() {
-                ctx.globalAlpha = this.alpha;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, 1.2, 0, Math.PI * 2);
-                ctx.fillStyle = this.color;
-                ctx.fill();
-            }
-            update() {
-                this.velocity.x *= this.friction;
-                this.velocity.y *= this.friction;
-                this.x += this.velocity.x;
-                this.y += this.velocity.y + 0.2;
-                this.alpha -= 0.01;
-            }
-        }
-
-        function createFirework() {
-            const x = Math.random() * canvas.width;
-            const y = Math.random() * canvas.height;
-            const colors = ['#FF6080', '#FFFB67', '#60EFFF', '#ADFF2F', '#FFFFFF'];
-            const color = colors[Math.floor(Math.random() * colors.length)];
-            for (let i = 0; i < 25; i++) particles.push(new Particle(x, y, color));
-        }
-
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            if (Math.random() < 0.03) createFirework();
-            particles.forEach((p, i) => {
-                if (p.alpha <= 0) particles.splice(i, 1);
-                else { p.update(); p.draw(); }
+            particles.forEach((p, i)=> { 
+                if(p.a <= 0) particles.splice(i, 1); 
+                else { p.update(); p.draw(); } 
             });
             requestAnimationFrame(animate);
         }
         animate();
     </script>
 </body>
-</html>
+</html>            
